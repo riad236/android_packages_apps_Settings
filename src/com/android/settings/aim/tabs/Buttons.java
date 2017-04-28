@@ -33,15 +33,35 @@ import com.android.settings.R;
 import com.android.settings.SettingsPreferenceFragment;
 import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.settings.Utils;
+import android.hardware.fingerprint.FingerprintManager;
 
 public class Buttons extends SettingsPreferenceFragment implements
         Preference.OnPreferenceChangeListener {
 
+        private static final String CATEGORY_FP = "category_fp";
+        private static final String FP_UNLOCK_KEYSTORE = "fp_unlock_keystore";
+
+        private SwitchPreference mFpKeystore;
+        private FingerprintManager mFingerprintManager;
+
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        final PreferenceScreen prefScreen = getPreferenceScreen();
 
         addPreferencesFromResource(R.xml.aim_buttons_tab);
+        mFingerprintManager = (FingerprintManager) getActivity().getSystemService(Context.FINGERPRINT_SERVICE);
+
+
+        mFpKeystore = (SwitchPreference) findPreference(FP_UNLOCK_KEYSTORE);
+        if (!mFingerprintManager.isHardwareDetected()){
+            prefScreen.removePreference(mFpKeystore);
+        } else {
+        mFpKeystore.setChecked((Settings.System.getInt(getContentResolver(),
+                Settings.System.FP_UNLOCK_KEYSTORE, 0) == 1));
+        mFpKeystore.setOnPreferenceChangeListener(this);
+        }
         ContentResolver resolver = getActivity().getContentResolver();
     }
 
@@ -62,7 +82,12 @@ public class Buttons extends SettingsPreferenceFragment implements
 
     public boolean onPreferenceChange(Preference preference, Object objValue) {
         final String key = preference.getKey();
-        return true;
-    }
-
+	   if (preference == mFpKeystore) {
+            boolean value = (Boolean) objValue;
+            Settings.System.putInt(getActivity().getContentResolver(),
+                    Settings.System.FP_UNLOCK_KEYSTORE, value ? 1 : 0);
+	return true;
+         }
+	return false;
+     }
 }
