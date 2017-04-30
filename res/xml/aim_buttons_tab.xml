@@ -41,4 +41,9 @@
         android:summary="@string/fp_unlock_keystore_summary"
         android:persistent="false" />
 
+<cyanogenmod.preference.CMSecureSettingSwitchPreference
+            android:key="advanced_reboot"
+            android:title="@string/advanced_reboot_title"
+            android:summary="@string/advanced_reboot_summary" />
+
 </PreferenceScreen>
