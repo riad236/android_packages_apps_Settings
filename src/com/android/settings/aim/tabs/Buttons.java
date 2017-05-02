@@ -21,6 +21,7 @@ import android.content.ContentResolver;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.UserHandle;
+import android.hardware.fingerprint.FingerprintManager;
 import android.support.v7.preference.PreferenceCategory;
 import android.support.v7.preference.ListPreference;
 import android.support.v7.preference.Preference;
@@ -33,37 +34,44 @@ import com.android.settings.R;
 import com.android.settings.SettingsPreferenceFragment;
 import com.android.internal.logging.MetricsProto.MetricsEvent;
 import com.android.settings.Utils;
-import android.hardware.fingerprint.FingerprintManager;
+import com.android.settings.aim.Preferences.SystemSettingSwitchPreference;
 
 public class Buttons extends SettingsPreferenceFragment implements
         Preference.OnPreferenceChangeListener {
 
-        private static final String CATEGORY_FP = "category_fp";
-        private static final String FP_UNLOCK_KEYSTORE = "fp_unlock_keystore";
+    private static final String FINGERPRINT_VIB = "fingerprint_success_vib";
+    private static final String CATEGORY_FP = "category_fp";
+    private static final String FP_UNLOCK_KEYSTORE = "fp_unlock_keystore";
 
-        private SwitchPreference mFpKeystore;
-        private FingerprintManager mFingerprintManager;
+    private FingerprintManager mFingerprintManager;
+
+    private SystemSettingSwitchPreference mFingerprintVib;
+       
+       
+
+       private SwitchPreference mFpKeystore;
 
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        final PreferenceScreen prefScreen = getPreferenceScreen();
 
         addPreferencesFromResource(R.xml.aim_buttons_tab);
-        mFingerprintManager = (FingerprintManager) getActivity().getSystemService(Context.FINGERPRINT_SERVICE);
-
-
-        mFpKeystore = (SwitchPreference) findPreference(FP_UNLOCK_KEYSTORE);
-        if (!mFingerprintManager.isHardwareDetected()){
-            prefScreen.removePreference(mFpKeystore);
-        } else {
-        mFpKeystore.setChecked((Settings.System.getInt(getContentResolver(),
-                Settings.System.FP_UNLOCK_KEYSTORE, 0) == 1));
-        mFpKeystore.setOnPreferenceChangeListener(this);
-        }
+        PreferenceScreen prefScreen = getPreferenceScreen();
         ContentResolver resolver = getActivity().getContentResolver();
-    }
+
+        mFingerprintManager = (FingerprintManager) getActivity().getSystemService(Context.FINGERPRINT_SERVICE);
+        mFpKeystore = (SwitchPreference) findPreference(FP_UNLOCK_KEYSTORE);
+        final PreferenceCategory fpCat = (PreferenceCategory) prefScreen.findPreference(CATEGORY_FP);
+        if (!mFingerprintManager.isHardwareDetected()){
+            prefScreen.removePreference(fpCat);
+
+        } else {
+       mFpKeystore.setChecked((Settings.System.getInt(getContentResolver(),
+              Settings.System.FP_UNLOCK_KEYSTORE, 0) == 1));
+       mFpKeystore.setOnPreferenceChangeListener(this);
+     }
+}
 
     @Override
     protected int getMetricsCategory() {
