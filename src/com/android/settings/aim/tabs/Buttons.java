@@ -61,6 +61,11 @@ public class Buttons extends SettingsPreferenceFragment implements
         ContentResolver resolver = getActivity().getContentResolver();
 
         mFingerprintManager = (FingerprintManager) getActivity().getSystemService(Context.FINGERPRINT_SERVICE);
+        mFingerprintVib = (SystemSettingSwitchPreference) findPreference(FINGERPRINT_VIB);
+         if (!mFingerprintManager.isHardwareDetected()){
+             secureCategory.removePreference(mFingerprintVib);
+         }
+         
         mFpKeystore = (SwitchPreference) findPreference(FP_UNLOCK_KEYSTORE);
         final PreferenceCategory fpCat = (PreferenceCategory) prefScreen.findPreference(CATEGORY_FP);
         if (!mFingerprintManager.isHardwareDetected()){
